@@ -1,8 +1,38 @@
-      
+var criminal = [];
+var police = [];
+function preload() {
+    for (var i = 0; i < 7; i++) {
+        criminal[i] = new Image();
+        criminal[i].src = preload.arguments[i];
+    }
+    for (var i = 8; i < 15; i++) {
+        police[i-8] = new Image();
+        police[i-8].src = preload.arguments[i];
+    }
+}
+//-- usage --//
+preload(
+    'Sprites/Criminal/up.png',
+    'Sprites/Criminal/upright.png',
+    'Sprites/Criminal/right.png',
+    'Sprites/Criminal/downright.png',
+    'Sprites/Criminal/down.png',
+    'Sprites/Criminal/downleft.png',
+    'Sprites/Criminal/left.png',
+    'Sprites/Criminal/upleft.png',
+    'Sprites/Police/up.png',
+    'Sprites/Police/upright.png',
+    'Sprites/Police/right.png',
+    'Sprites/Police/downright.png',
+    'Sprites/Police/down.png',
+    'Sprites/Police/downleft.png',
+    'Sprites/Police/left.png',
+    'Sprites/Police/upleft.png',
+)
+
+
 
 var keys = [];
-	  
-
 
 var voitto = "Error";
 var game_running = true;
@@ -21,11 +51,11 @@ class BasePlayer
 	}
 
 	setPosition(x,y)
-	{		
+	{
 		this.x = x;
 		this.y = y;
 	}
-	
+
 	setAngle(angl)
 	{
 		this.angle = angl;
@@ -41,7 +71,7 @@ class BasePlayer
 		return this.x;
 	}
 
-	
+
 	get getY()
 	{
 		return this.y;
@@ -76,7 +106,7 @@ class BasePlayer
 	{
 		this.score = score;
 	}
-	
+
 }
 
 class LocalPlayer extends BasePlayer
@@ -98,42 +128,19 @@ class LocalPlayer extends BasePlayer
 		if ((this.x + this.width) >= canvas.width) {
 			this.x = (canvas.width - this.width) - 10;
 			this.velocity_x = 0;
-
-			//went out from right
-			//release the key
-			keys[39] = false;
-			//invert direction
-			this.angle = -this.angle;
 		}
 		else if ((this.x) <= 0) {
 			this.x = 10;
 			this.velocity_x = -this.velocity_x;
-			//went out from left
-			//release the key
-			keys[37] = false;
-			//invert direction
-			this.angle = -this.angle;
-
 		}
 
 		if ((this.y) <= 0) {
 			this.y = (10);
 			this.velocity_y = -this.velocity_y;
-
-			//went out from top
-			//release the key
-			keys[38] = false;
-			//invert direction
-			this.angle = 180;
 		}
 		else if ((this.y + this.height) >= canvas.height) {
 			this.y = (canvas.height - this.height) - 10;
 			this.velocity_y = 0;
-			//went out from bottom
-			//release the key
-			keys[40] = false;
-			//invert direction
-			this.angle = 0;
 		}
 	}
 
@@ -171,19 +178,19 @@ class LocalPlayer extends BasePlayer
 	}
 
 
-
+//Localplayer draw//////////////////////////////////////////////////////////////
 	draw()
 	{
-					
-		var canvas = document.getElementById('canvas');			
+
+		var canvas = document.getElementById('canvas');
 		var ctx = canvas.getContext('2d');
 
-			
+
 		ctx.fillStyle = 'rgba(255, 255, 23)';
 		ctx.font = '18px tahoma';
-		ctx.textAlign = 'center';		
+		ctx.textAlign = 'center';
 		var center_x = (this.x + (this.width / 2));
-		
+
 		ctx.fillText('(you)', center_x, this.y - 20);
 
 
@@ -192,15 +199,31 @@ class LocalPlayer extends BasePlayer
 
 		ctx.translate(this.x+this.width/2,this.y+this.height/2);
 
-		ctx.rotate(this.angle*Math.PI/180);
+    var angle = this.getAngle;
 
 		if(this.role == 'poliisi')
 		{
-			ctx.fillStyle = 'rgba(0, 0, 200, 0.5)';
+      if ((angle > 315)||(angle < 45)){
+        ctx.drawImage(police[0], -64, -64, 128, 128);
+      }else if ((angle > 45)&&(angle < 135)) {
+        ctx.drawImage(police[2], -64, -64, 128, 128);
+      }else if ((angle > 135)&&(angle < 225)) {
+        ctx.drawImage(police[4], -64, -64, 128, 128);
+      }else if ((angle > 225)&&(angle < 315)) {
+        ctx.drawImage(police[6], -64, -64, 128, 128);
+      }
 		}
 		else
 		{
-			ctx.fillStyle = 'rgba(200, 0, 0, 0.5)';
+      if ((angle > 315)||(angle < 45)){
+        ctx.drawImage(criminal[0], -64, -64, 128, 128);
+      }else if ((angle > 45)&&(angle < 135)) {
+        ctx.drawImage(criminal[2], -64, -64, 128, 128);
+      }else if ((angle > 135)&&(angle < 225)) {
+        ctx.drawImage(criminal[4], -64, -64, 128, 128);
+      }else if ((angle > 225)&&(angle < 315)) {
+        ctx.drawImage(criminal[6], -64, -64, 128, 128);
+      }
 
 		}
 
@@ -215,6 +238,7 @@ class LocalPlayer extends BasePlayer
 		ctx.restore();
 
 	}
+////////////////////////////////////////////////////////////////////////////////
 
 	setLastAngle(angle)
 	{
@@ -236,14 +260,14 @@ class LocalPlayer extends BasePlayer
 		//check comparing previous values if we need to send update to server
 		if (x_int != lastx_int || y_int != lasty_int || angle_int != last_angle_int) {
 
-			socket.emit('position update', this.x, this.y, this.angle);			
+			socket.emit('position update', this.x, this.y, this.angle);
 			this.setLastPosition(x_int,y_int);
 			this.setLastAngle(angle_int);
 		}
 	}
 
 	setPosition(x,y)
-	{	
+	{
 		super.setPosition(x,y);
 		this.handleBounds();
 		this.checkSendUpdate();
@@ -259,10 +283,12 @@ class Enemy extends BasePlayer
 		super(x,y);
 	}
 
+
+  //Opponent Draw///////////////////////////////////////////////////////////////
 	draw()
 	{
-					
-		var canvas = document.getElementById('canvas');			
+
+		var canvas = document.getElementById('canvas');
 		var ctx = canvas.getContext('2d');
 
 		ctx.save();
@@ -270,15 +296,31 @@ class Enemy extends BasePlayer
 
 		ctx.translate(this.x+this.width/2,this.y+this.height/2);
 
-		ctx.rotate(this.angle*Math.PI/180);
+    var angle = this.getAngle;
 
 		if(this.role == 'poliisi')
 		{
-			ctx.fillStyle = 'rgba(0, 0, 200, 0.5)';
+      if ((angle > 315)||(angle < 45)){
+        ctx.drawImage(police[0], -64, -64, 128, 128);
+      }else if ((angle > 45)&&(angle < 135)) {
+        ctx.drawImage(police[2], -64, -64, 128, 128);
+      }else if ((angle > 135)&&(angle < 225)) {
+        ctx.drawImage(police[4], -64, -64, 128, 128);
+      }else if ((angle > 225)&&(angle < 315)) {
+        ctx.drawImage(police[6], -64, -64, 128, 128);
+      }
 		}
 		else
 		{
-			ctx.fillStyle = 'rgba(200, 0, 0, 0.5)';
+      if ((angle > 315)||(angle < 45)){
+        ctx.drawImage(criminal[0], -64, -64, 128, 128);
+      }else if ((angle > 45)&&(angle < 135)) {
+        ctx.drawImage(criminal[2], -64, -64, 128, 128);
+      }else if ((angle > 135)&&(angle < 225)) {
+        ctx.drawImage(criminal[4], -64, -64, 128, 128);
+      }else if ((angle > 225)&&(angle < 315)) {
+        ctx.drawImage(criminal[6], -64, -64, 128, 128);
+      }
 
 		}
 		//base draw
@@ -292,7 +334,7 @@ class Enemy extends BasePlayer
 		ctx.restore();
 
 	}
-
+////////////////////////////////////////////////////////////////////////////////
 }
 
 //connect to node server
@@ -309,7 +351,7 @@ socket.on('player joined', (pos_x,pos_y) => {
 		enemy.setRole('rosvo')
 	else
 		enemy.setRole('poliisi')
-	
+
 	console.log("enemy joined");
 
 });
@@ -327,7 +369,7 @@ socket.on('position update', (pos_x,pos_y,angle) => {
 socket.on('get start info', (pos_x,pos_y,role) => {
 
 	localplayer = new LocalPlayer(pos_x,pos_y);
-	
+
 	localplayer.setRole(role);
 	localplayer.setPosition(pos_x,pos_y);
 
@@ -348,7 +390,7 @@ class projectile{
 	}
 
 	setPosition(x,y)
-	{		
+	{
 		this.x = x;
 		this.y = y;
 	}
@@ -373,7 +415,7 @@ class projectile{
 		return this.x;
 	}
 
-	
+
 	get getY()
 	{
 		return this.y;
@@ -395,12 +437,13 @@ class projectile{
 	}
 
 
+
+  //Projectile draw///////////////////////////////////////////////////////////
 	draw()
 	{
 
-		var canvas = document.getElementById('canvas');			
+		var canvas = document.getElementById('canvas');
 		var ctx = canvas.getContext('2d');
-
 
 		var missle_x = this.getX;
 		var missle_y = this.getY;
@@ -431,6 +474,7 @@ class projectile{
 		ctx.fillRect(missle_x, missle_y, this.getWidth, this.getHeight);
 
 	}
+////////////////////////////////////////////////////////////////////////////////
 }
 
 socket.on('create projectile', (pos_x,pos_y,angle) => {
@@ -439,25 +483,25 @@ socket.on('create projectile', (pos_x,pos_y,angle) => {
 
 	missle.setAngle(angle);
 	projectiles.push(missle);
-   
+
 });
 
 
-
+//Game happens here, sort of////////////////////////////////////////////////////
 function draw() {
     var canvas = document.getElementById('canvas');
     if (canvas.getContext) {
-		
-		
+
+
 		requestAnimationFrame(draw);
-			
+
 		var ctx = canvas.getContext('2d');
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 		//background
 		ctx.fillStyle = 'rgb(53, 53, 53,0.5)';
 		ctx.fillRect(0,0,canvas.width, canvas.height);
-		
+
 		//movement code
 		var speed = 10;
 		if (game_running) {
@@ -466,30 +510,30 @@ function draw() {
 			var pos_x = localplayer.getX;
 			var pos_y = localplayer.getY;
 			var angle = localplayer.getAngle;
-			if (keys[40]) {
-				pos_y += speed;
-				angle = 180;
-			}
-			else if (keys[38]) {
+
+			if (keys[38]) {
 				pos_y -= speed;
 				angle = 0;
 			}
 			else if (keys[39]) {
 				pos_x += speed;
 				angle = 90;
-
 			}
+      else if (keys[40]) {
+        pos_y += speed;
+        angle = 180;
+      }
 			else if (keys[37]) {
 				pos_x -= speed;
-				angle = -90;
+				angle = 270;
 			}
 
-			
-			localplayer.setAngle(angle);			
+
+			localplayer.setAngle(angle);
 			localplayer.setPosition(pos_x,pos_y);
-			
+
 			if(keys[32])
-			{			
+			{
 				var missle = new projectile(localplayer.getX,localplayer.getY);
 
 				missle.setCreatedLocally();
@@ -506,8 +550,8 @@ function draw() {
 			ctx.fillStyle = 'rgba(255, 255, 23)';
 			ctx.font = '28px tahoma';
 			ctx.textAlign = 'center';
-			
-			var center_x = (canvas.width / 2);		
+
+			var center_x = (canvas.width / 2);
 			ctx.fillText('rosvo & poliisi', center_x, 50);
 
 
@@ -516,8 +560,8 @@ function draw() {
 			ctx.fillStyle = 'rgba(80, 60, 240)';
 			ctx.font = '18px tahoma';
 			ctx.textAlign = 'right';
-			
-			var center_x = (canvas.width) - 5;		
+
+			var center_x = (canvas.width) - 5;
 			if(localplayer != 0)
 			{
 				var score = localplayer.getScore;
@@ -536,7 +580,7 @@ function draw() {
 				ctx.fillText(loc_text, center_x, 80);
 			}
 
-			
+
 
 
 			if(localplayer != 0)
@@ -568,7 +612,7 @@ function draw() {
 					var pos_x = missle.getX + projectile_speed;
 					missle.setPosition(pos_x, missle.getY);
 				}
-				else if (missle.getAngle == -90) {
+				else if (missle.getAngle == 270) {
 					var pos_x = missle.getX - projectile_speed;
 					missle.setPosition(pos_x, missle.getY);
 				}
@@ -640,13 +684,13 @@ function draw() {
 
 				}
 			}
-			
+
 
 		}
 		else{
 
 		}
-		
+
     }
 }
 
@@ -656,10 +700,9 @@ document.body.addEventListener("keydown", function (e) {
 document.body.addEventListener("keyup", function (e) {
     keys[e.keyCode] = false;
 });
-	  
+
 
 socket.emit('client join');
 
 
 draw();
-	  
