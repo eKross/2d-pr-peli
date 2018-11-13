@@ -1,6 +1,5 @@
 var criminal = [];
 var police = [];
-
 function preload() {
     for (var i = 0; i < 7; i++) {
         criminal[i] = new Image();
@@ -10,7 +9,6 @@ function preload() {
         police[i-8] = new Image();
         police[i-8].src = preload.arguments[i];
     }
-	 
 }
 //-- usage --//
 preload(
@@ -30,7 +28,6 @@ preload(
     'Sprites/Police/downleft.png',
     'Sprites/Police/left.png',
     'Sprites/Police/upleft.png',
-
 )
 
 
@@ -228,26 +225,22 @@ class LocalPlayer extends BasePlayer
         ctx.drawImage(criminal[6], -64, -64, 128, 128);
       }
 
-		};
+		}
+var score= localplayer.getScore;
 		
-		var score= localplayer.getScore;
-		
-		if(score<=0){
+	if(score<=0){
 			
 let img = new Image();
 img.src = 'exp2.png';
 img.onload = function() {
   init();
 };
-
-
-
-const scale = 1;
-const width = 64;
-const height = 64;
-const scaledWidth = scale * width;
-const scaledHeight = scale * height;
-
+		
+const scale=1;
+const width=64;
+const height=64;
+const scaledWidth=scale*width;
+const scaledHeight=scale*height;
 
 function drawFrame(frameX, frameY,canvasX,canvasY) {
 var canvasX = localplayer.getX;	
@@ -255,8 +248,8 @@ var canvasY = localplayer.getY;
 
 
 
-  ctx.drawImage(img,frameX  * width, frameY * height, width, height,
-                canvasX, canvasY, scaledWidth, scaledHeight);
+ctx.drawImage(img,frameX  * width, frameY * height, width, height,
+        canvasX, canvasY, scaledWidth, scaledHeight);
 }
 
 const cycleLoop = [0, 1, 2, 3];
@@ -264,42 +257,31 @@ let currentLoopIndex = 0;
 let frameCount = 0;
 let currentDirection = 0;
 
-function step() {
-  frameCount++;
-  if (frameCount <5) {
-    window.requestAnimationFrame(step);
-    return;
-  }
-  frameCount = 0;
-  
- 
-  drawFrame(cycleLoop[currentLoopIndex], currentDirection, 0, 0);
-  currentLoopIndex++;
-  if (currentLoopIndex >= cycleLoop.length) {
-    currentLoopIndex = 0;
-    currentDirection++;
-	//console.log(currentLoopIndex);
-  }
-  if (currentDirection >= 4) {
-    currentDirection = 0;
-  }
-  
-}
-window.setInterval(init,1000);
-function init() {
-  window.requestAnimationFrame(step);
-}
-			
+	function explode() {
+		frameCount++;
+		if (frameCount < 15) {
+			window.requestAnimationFrame(explode);
+			return;
+		}
+		frameCount = 0;
+
+		drawFrame(cycleLoop[currentLoopIndex], currentDirection, 0, 0);
+		currentLoopIndex++;
+		if (currentLoopIndex >= cycleLoop.length) {
+			currentLoopIndex = 0;
+			currentDirection++;
 			
 		}
-		
-	
-		
-	
-		
+		if (currentDirection >= 4) {
+			currentDirection = 0;
+		}
 
+	}window.setInterval(init,1000);
 
-
+function init() {
+window.requestAnimationFrame(explode);
+}
+	}
 
 		//base draw
 		ctx.fillRect(-this.width/2, -this.height/2, this.width, this.height);
@@ -310,8 +292,9 @@ function init() {
 		ctx.fillRect(-this.width/2, -this.height/2, this.width, 5);
 
 		ctx.restore();
-		
+
 	}
+	
 ////////////////////////////////////////////////////////////////////////////////
 
 	setLastAngle(angle)
