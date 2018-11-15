@@ -226,9 +226,10 @@ class LocalPlayer extends BasePlayer
       }
 
 		}
+		
 var score= localplayer.getScore;
 		
-	if(score<=0){
+	if(score==0){
 			
 let img = new Image();
 img.src = 'exp2.png';
@@ -237,8 +238,8 @@ img.onload = function() {
 };
 		
 const scale=1;
-const width=64;
-const height=64;
+const width=62;
+const height=62;
 const scaledWidth=scale*width;
 const scaledHeight=scale*height;
 
@@ -272,16 +273,18 @@ let currentDirection = 0;
 			currentDirection++;
 			
 		}
-		if (currentDirection >= 4) {
-			currentDirection = 0;
-		}
+		
 
-	}window.setInterval(init,1000);
+	}window.setInterval(init,16);
 
 function init() {
 window.requestAnimationFrame(explode);
 }
-	}
+}
+
+
+		
+	
 
 		//base draw
 		ctx.fillRect(-this.width/2, -this.height/2, this.width, this.height);
