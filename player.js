@@ -234,7 +234,7 @@ class LocalPlayer extends BasePlayer
 			step_width, step_height, this.x, this.y,step_width,step_height);
 			
 			//check if exp.png is still going
-			if ((horizontal_index != 4) && (!horizontal_index != 4))
+			if ((horizontal_index != 4) && (vertical_index != 4))
 			{
 				counter++;
 			}
