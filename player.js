@@ -79,6 +79,8 @@ var counter = 0;
 var vertical_index = 0;
 //movement direction on the image
 var horizontal_index = 0;
+//death timer
+var ticks = 0;
 class LocalPlayer extends BasePlayer
 {
 	constructor(x,y)
@@ -170,14 +172,14 @@ class LocalPlayer extends BasePlayer
 	addVelocity(x,y)
 	{
 		this.velocity_x += x;
-		this.velocity_y += y;
+		this.velocity_y += y;0
 	}
 
 
     //draw localplayer
 	drawLocalPlayer()
 	{
-					
+		
 		var canvas = document.getElementById('canvas');			
 		var ctx = canvas.getContext('2d');
 
@@ -220,38 +222,52 @@ class LocalPlayer extends BasePlayer
 
 		//restore the original canvas state
 		ctx.restore();
-	
+		
+
 		//size of each slice of the image
 		var step_width = 62;
 		var step_height = 62;
 	
-		ctx.drawImage(img,horizontal_index  * step_width, vertical_index * step_height,
+			if ((this.score) <= 0) {
+
+			ctx.drawImage(img,horizontal_index  * step_width, vertical_index * step_height,
 			step_width, step_height, this.x, this.y,step_width,step_height);
-
-		counter++;
-
-		if(counter > 5)
-		{
-			//next slice
-			horizontal_index++;
-			//4 slices per horizontal and vertical row
-			if (horizontal_index >= 4) {
-				horizontal_index = 0;
-
-				//move to next row
-				vertical_index++;
-
-				if(vertical_index >= 4)
-				{
-					vertical_index = 0;
-				}
-				
+			
+			//check if exp.png is still going
+			if ((horizontal_index != 4) && (!horizontal_index != 4))
+			{
+				counter++;
+			}
+			
+			if (ticks < 50){
+				ticks++;
+			}
+			else{
+				ticks = 51;
 			}
 
-			counter = 0;
-		}		
-	}
+			if(counter > 5)
+			{
+				//next slice
+				horizontal_index++;
+				//4 slices per horizontal and vertical row
+				if (horizontal_index >= 4) {
+					horizontal_index = 0;
 
+					//move to next row
+					vertical_index++;
+
+					if(vertical_index >= 4)
+					{
+						//vertical_index = 0;
+					}
+					
+				}
+
+				counter = 0;
+			}	
+		}
+	}
 	setLastAngle(angle)
 	{
 		this.last_angle = angle;
@@ -287,8 +303,6 @@ class LocalPlayer extends BasePlayer
 		this.handleBounds();
 		this.checkSendUpdate();
 	}
-
-
 }
 
 class Enemy extends BasePlayer

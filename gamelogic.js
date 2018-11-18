@@ -210,7 +210,7 @@ function main() {
 			//check localplayer has been created
 			if (localplayer != 0) {
 				var score = localplayer.getScore;
-				var loc_text = "You " + String(score);
+				var loc_text = "You: " + String(score);
 				if (score <= 0)
 					loc_text = 'Dead';
 				ctx.fillText(loc_text, center_x, 50);
@@ -219,7 +219,7 @@ function main() {
 			//check enemy has been created
 			if (enemy != 0) {
 				var score = enemy.getScore;
-				var loc_text = "Enemy " + String(score);
+				var loc_text = "Enemy: " + String(score);
 				if (score <= 0)
 					loc_text = 'Dead';
 				ctx.fillText(loc_text, center_x, 80);
