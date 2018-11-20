@@ -1,4 +1,3 @@
-      
 
 //boolean array for all keycodes to detect keys
 var keys = [];
@@ -182,7 +181,7 @@ function main() {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 		//draw background
-		ctx.fillStyle = 'rgb(53, 53, 53,0.5)';
+		ctx.fillStyle = 'rgb(53, 53, 53, 0)';
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 
@@ -199,7 +198,7 @@ function main() {
 			ctx.font = '28px tahoma';
 			ctx.textAlign = 'center';
 			var center_x = (canvas.width / 2);
-			ctx.fillText('rosvo & poliisi', center_x, 50);
+			ctx.fillText('Rosvo & Poliisi', 140, 50);
 
 
 			//scores
@@ -210,10 +209,10 @@ function main() {
 			//check localplayer has been created
 			if (localplayer != 0) {
 				var score = localplayer.getScore;
-				var loc_text = "You: " + String(score);
+				var loc_text = "You:  " + String(score);
 				if (score <= 0)
 					loc_text = 'Dead';
-				ctx.fillText(loc_text, center_x, 50);
+				ctx.fillText(loc_text, 800, 50);
 			}
 
 			//check enemy has been created
@@ -222,7 +221,7 @@ function main() {
 				var loc_text = "Enemy: " + String(score);
 				if (score <= 0)
 					loc_text = 'Dead';
-				ctx.fillText(loc_text, center_x, 80);
+				ctx.fillText(loc_text, 960, 50);
 			}
 
 

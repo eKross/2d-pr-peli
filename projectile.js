@@ -74,22 +74,22 @@ class projectile{
 		{
 			if(localplayer.getRole == 'poliisi')
 			{
-				ctx.fillStyle = 'rgba(0, 0, 200, 0.5)';
+				ctx.fillStyle = 'rgba(0, 0, 200, 1)';
 			}
 			else
 			{
-				ctx.fillStyle = 'rgba(200, 0, 0, 0.5)';
+				ctx.fillStyle = 'rgba(200, 0, 0, 1)';
 			}
 		}
 		else
 		{
 			if(localplayer.getRole == 'rosvo')
 			{
-				ctx.fillStyle = 'rgba(0, 0, 200, 0.5)';
+				ctx.fillStyle = 'rgba(0, 0, 200, 1)';
 			}
 			else
 			{
-				ctx.fillStyle = 'rgba(200, 0, 0, 0.5)';
+				ctx.fillStyle = 'rgba(200, 0, 0, 1)';
 			}
 
         }

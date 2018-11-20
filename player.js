@@ -222,7 +222,6 @@ class LocalPlayer extends BasePlayer
 
 		//restore the original canvas state
 		ctx.restore();
-		
 
 		//size of each slice of the image
 		var step_width = 62;
