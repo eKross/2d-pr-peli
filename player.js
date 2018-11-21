@@ -1,5 +1,45 @@
 
 
+function getImageBasedOnRoleAndAngle(role, angle) {
+
+	var images = police;
+	if (role == 'rosvo')
+		images = criminal;
+
+	var img_return = images[0];
+	/*if ((angle > 315) || (angle < 45)) {
+		img_retn = images[0];
+	}
+	else if ((angle > 45) && (angle < 135)) {
+		img_retn = images[2];
+	}
+	else if ((angle > 135) && (angle < 225)) {
+		img_retn = images[4];
+	}
+	else if ((angle > 225) && (angle < 315)) {
+		img_retn = images[6];
+	}*/
+
+	if(angle == 0)
+	{
+		img_retn = images[0];
+	}
+	else if(angle == 90)
+	{
+		img_retn = images[2];
+	}
+	else if(angle == -90)
+	{
+		img_retn = images[6];
+	}
+	else if(angle == 180)
+	{
+		img_retn = images[4];
+	}
+
+	return img_retn;
+}
+
 class BasePlayer
 {
 	constructor(x,y)
@@ -79,6 +119,8 @@ var counter = 0;
 var vertical_index = 0;
 //movement direction on the image
 var horizontal_index = 0;
+//death timer
+var ticks = 0;
 class LocalPlayer extends BasePlayer
 {
 	constructor(x,y)
@@ -170,14 +212,14 @@ class LocalPlayer extends BasePlayer
 	addVelocity(x,y)
 	{
 		this.velocity_x += x;
-		this.velocity_y += y;
+		this.velocity_y += y;0
 	}
 
 
     //draw localplayer
 	drawLocalPlayer()
 	{
-					
+		
 		var canvas = document.getElementById('canvas');			
 		var ctx = canvas.getContext('2d');
 
@@ -198,17 +240,9 @@ class LocalPlayer extends BasePlayer
 		ctx.translate(this.x+this.width/2,this.y+this.height/2);
 
 		//rotate the shape in degrees
-		ctx.rotate(this.angle*Math.PI/180);
+		//ctx.rotate(this.angle*Math.PI/180);
 
-		//set color based on role
-		if(this.role == 'poliisi')
-		{
-			ctx.fillStyle = 'rgba(0, 0, 200, 0.5)';
-		}
-		else
-		{
-			ctx.fillStyle = 'rgba(200, 0, 0, 0.5)';
-		}
+		ctx.drawImage(getImageBasedOnRoleAndAngle(this.role,this.getAngle), -64, -64, 128, 128);
 
 		//draw the base rectangle
 		ctx.fillRect(-this.width/2, -this.height/2, this.width, this.height);
@@ -220,38 +254,51 @@ class LocalPlayer extends BasePlayer
 
 		//restore the original canvas state
 		ctx.restore();
-	
+
 		//size of each slice of the image
 		var step_width = 62;
 		var step_height = 62;
 	
-		ctx.drawImage(img,horizontal_index  * step_width, vertical_index * step_height,
+			if ((this.score) <= 0) {
+
+			ctx.drawImage(img,horizontal_index  * step_width, vertical_index * step_height,
 			step_width, step_height, this.x, this.y,step_width,step_height);
-
-		counter++;
-
-		if(counter > 5)
-		{
-			//next slice
-			horizontal_index++;
-			//4 slices per horizontal and vertical row
-			if (horizontal_index >= 4) {
-				horizontal_index = 0;
-
-				//move to next row
-				vertical_index++;
-
-				if(vertical_index >= 4)
-				{
-					vertical_index = 0;
-				}
-				
+			
+			//check if exp.png is still going
+			if ((horizontal_index != 4) && (vertical_index != 4))
+			{
+				counter++;
+			}
+			
+			if (ticks < 50){
+				ticks++;
+			}
+			else{
+				ticks = 51;
 			}
 
-			counter = 0;
-		}		
-	}
+			if(counter > 5)
+			{
+				//next slice
+				horizontal_index++;
+				//4 slices per horizontal and vertical row
+				if (horizontal_index >= 4) {
+					horizontal_index = 0;
 
+					//move to next row
+					vertical_index++;
+
+					if(vertical_index >= 4)
+					{
+						//vertical_index = 0;
+					}
+					
+				}
+
+				counter = 0;
+			}	
+		}
+	}
 	setLastAngle(angle)
 	{
 		this.last_angle = angle;
@@ -287,8 +334,6 @@ class LocalPlayer extends BasePlayer
 		this.handleBounds();
 		this.checkSendUpdate();
 	}
-
-
 }
 
 class Enemy extends BasePlayer
@@ -311,17 +356,11 @@ class Enemy extends BasePlayer
 
 		ctx.translate(this.x+this.width/2,this.y+this.height/2);
 
-		ctx.rotate(this.angle*Math.PI/180);
+		//ctx.rotate(this.angle*Math.PI/180);
 
-		if(this.role == 'poliisi')
-		{
-			ctx.fillStyle = 'rgba(0, 0, 200, 0.5)';
-		}
-		else
-		{
-			ctx.fillStyle = 'rgba(200, 0, 0, 0.5)';
+		ctx.drawImage(getImageBasedOnRoleAndAngle(this.role,this.angle), -64, -64, 128, 128);
 
-		}
+
 		//base draw
 		ctx.fillRect(-this.width/2, -this.height/2, this.width, this.height);
 

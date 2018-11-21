@@ -1,4 +1,40 @@
-      
+
+var criminal = [];
+var police = [];
+function preload() {
+
+	var i = 0;
+    for (; i < 7; i++) {
+        criminal[i] = new Image();
+        criminal[i].src = preload.arguments[i];
+	}
+	
+	i += 1;
+
+    for (var j = 0; j < 7; j++) {
+        police[j] = new Image();
+		police[j].src = preload.arguments[i+j];
+    }
+}
+//-- usage --//
+preload(
+    'Sprites/Criminal/up.png',
+    'Sprites/Criminal/upright.png',
+    'Sprites/Criminal/right.png',
+    'Sprites/Criminal/downright.png',
+    'Sprites/Criminal/down.png',
+    'Sprites/Criminal/downleft.png',
+    'Sprites/Criminal/left.png',
+    'Sprites/Criminal/upleft.png',
+    'Sprites/Police/up.png',
+    'Sprites/Police/upright.png',
+    'Sprites/Police/right.png',
+    'Sprites/Police/downright.png',
+    'Sprites/Police/down.png',
+    'Sprites/Police/downleft.png',
+    'Sprites/Police/left.png',
+    'Sprites/Police/upleft.png',
+)
 
 //boolean array for all keycodes to detect keys
 var keys = [];
@@ -182,7 +218,7 @@ function main() {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 		//draw background
-		ctx.fillStyle = 'rgb(53, 53, 53,0.5)';
+		ctx.fillStyle = 'rgb(53, 53, 53, 0)';
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 
@@ -199,7 +235,7 @@ function main() {
 			ctx.font = '28px tahoma';
 			ctx.textAlign = 'center';
 			var center_x = (canvas.width / 2);
-			ctx.fillText('rosvo & poliisi', center_x, 50);
+			ctx.fillText('Rosvo & Poliisi', 140, 50);
 
 
 			//scores
@@ -210,19 +246,19 @@ function main() {
 			//check localplayer has been created
 			if (localplayer != 0) {
 				var score = localplayer.getScore;
-				var loc_text = "You " + String(score);
+				var loc_text = "You:  " + String(score);
 				if (score <= 0)
 					loc_text = 'Dead';
-				ctx.fillText(loc_text, center_x, 50);
+				ctx.fillText(loc_text, 800, 50);
 			}
 
 			//check enemy has been created
 			if (enemy != 0) {
 				var score = enemy.getScore;
-				var loc_text = "Enemy " + String(score);
+				var loc_text = "Enemy: " + String(score);
 				if (score <= 0)
 					loc_text = 'Dead';
-				ctx.fillText(loc_text, center_x, 80);
+				ctx.fillText(loc_text, 960, 50);
 			}
 
 
