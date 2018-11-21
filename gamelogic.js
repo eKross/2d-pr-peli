@@ -1,4 +1,36 @@
 
+var criminal = [];
+var police = [];
+function preload() {
+    for (var i = 0; i < 7; i++) {
+        criminal[i] = new Image();
+        criminal[i].src = preload.arguments[i];
+    }
+    for (var i = 8; i < 15; i++) {
+        police[i-8] = new Image();
+        police[i-8].src = preload.arguments[i];
+    }
+}
+//-- usage --//
+preload(
+    'Sprites/Criminal/up.png',
+    'Sprites/Criminal/upright.png',
+    'Sprites/Criminal/right.png',
+    'Sprites/Criminal/downright.png',
+    'Sprites/Criminal/down.png',
+    'Sprites/Criminal/downleft.png',
+    'Sprites/Criminal/left.png',
+    'Sprites/Criminal/upleft.png',
+    'Sprites/Police/up.png',
+    'Sprites/Police/upright.png',
+    'Sprites/Police/right.png',
+    'Sprites/Police/downright.png',
+    'Sprites/Police/down.png',
+    'Sprites/Police/downleft.png',
+    'Sprites/Police/left.png',
+    'Sprites/Police/upleft.png',
+)
+
 //boolean array for all keycodes to detect keys
 var keys = [];
 	  

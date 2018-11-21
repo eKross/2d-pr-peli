@@ -200,16 +200,46 @@ class LocalPlayer extends BasePlayer
 		ctx.translate(this.x+this.width/2,this.y+this.height/2);
 
 		//rotate the shape in degrees
-		ctx.rotate(this.angle*Math.PI/180);
+		//ctx.rotate(this.angle*Math.PI/180);
 
-		//set color based on role
-		if(this.role == 'poliisi')
+		var angle = this.getAngle;
+
+		if (this.role == 'poliisi')
 		{
-			ctx.fillStyle = 'rgba(0, 0, 200, 0.5)';
+			if ((angle > 315)||(angle < 45)){
+				ctx.drawImage(police[0], -64, -64, 128, 128);
+			}
+			else if ((angle > 45)&&(angle < 135)) 
+			{
+				ctx.drawImage(police[2], -64, -64, 128, 128);
+			}
+			else if ((angle > 135)&&(angle < 225)) 
+			{
+				ctx.drawImage(police[4], -64, -64, 128, 128);
+			}
+			else if ((angle > 225)&&(angle < 315)) 
+			{
+				ctx.drawImage(police[6], -64, -64, 128, 128);
+			}
 		}
 		else
 		{
-			ctx.fillStyle = 'rgba(200, 0, 0, 0.5)';
+			if ((angle > 315)||(angle < 45))
+			{
+				ctx.drawImage(criminal[0], -64, -64, 128, 128);
+			}
+			else if ((angle > 45)&&(angle < 135)) 
+			{
+				ctx.drawImage(criminal[2], -64, -64, 128, 128);
+			}
+			else if ((angle > 135)&&(angle < 225)) 
+			{
+				ctx.drawImage(criminal[4], -64, -64, 128, 128);
+			}
+			else if ((angle > 225)&&(angle < 315)) 
+			{
+				ctx.drawImage(criminal[6], -64, -64, 128, 128);
+			}
 		}
 
 		//draw the base rectangle
@@ -324,17 +354,47 @@ class Enemy extends BasePlayer
 
 		ctx.translate(this.x+this.width/2,this.y+this.height/2);
 
-		ctx.rotate(this.angle*Math.PI/180);
+		//ctx.rotate(this.angle*Math.PI/180);
 
-		if(this.role == 'poliisi')
-		{
-			ctx.fillStyle = 'rgba(0, 0, 200, 0.5)';
-		}
-		else
-		{
-			ctx.fillStyle = 'rgba(200, 0, 0, 0.5)';
+		var angle = this.getAngle;
 
+	if (this.role == 'poliisi')
+	{
+		if ((angle > 315)||(angle < 45)){
+			ctx.drawImage(police[0], -64, -64, 128, 128);
 		}
+		else if ((angle > 45)&&(angle < 135)) 
+		{
+			ctx.drawImage(police[2], -64, -64, 128, 128);
+		}
+		else if ((angle > 135)&&(angle < 225)) 
+		{
+			ctx.drawImage(police[4], -64, -64, 128, 128);
+		}
+		else if ((angle > 225)&&(angle < 315)) 
+		{
+			ctx.drawImage(police[6], -64, -64, 128, 128);
+		}
+	}
+	else
+	{
+		if ((angle > 315)||(angle < 45))
+		{
+			ctx.drawImage(criminal[0], -64, -64, 128, 128);
+		}
+		else if ((angle > 45)&&(angle < 135)) 
+		{
+			ctx.drawImage(criminal[2], -64, -64, 128, 128);
+		}
+		else if ((angle > 135)&&(angle < 225)) 
+		{
+			ctx.drawImage(criminal[4], -64, -64, 128, 128);
+		}
+		else if ((angle > 225)&&(angle < 315)) 
+		{
+			ctx.drawImage(criminal[6], -64, -64, 128, 128);
+		}
+	}
 		//base draw
 		ctx.fillRect(-this.width/2, -this.height/2, this.width, this.height);
 
