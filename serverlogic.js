@@ -33,7 +33,7 @@ io.on('connection', function(socket){
   });
 
   //only allow 1v1
-  if(player_count < 200)
+  if(player_count < 2)
   {
   //2nd client gets to be a cop
     socket.on('client join', () => {
