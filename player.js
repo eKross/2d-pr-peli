@@ -6,36 +6,101 @@ function getImageBasedOnRoleAndAngle(role, angle) {
 	if (role == 'rosvo')
 		images = criminal;
 
-	var img_return = images[0];
-	/*if ((angle > 315) || (angle < 45)) {
+	var img_retn = images[0];
+	/*if ((angle > 348.75) || (angle < 11.25)){
 		img_retn = images[0];
 	}
-	else if ((angle > 45) && (angle < 135)) {
+	else if ((angle > 11.25) && (angle < 33.75)){
+		img_retn = images[1];
+	}
+	else if ((angle > 33.75) && (angle < 56.25)){
 		img_retn = images[2];
 	}
-	else if ((angle > 135) && (angle < 225)) {
+	else if ((angle > 56.25) && (angle < 78.75)){
+		img_retn = images[3];
+	}
+	else if ((angle > 78.75) && (angle < 101.25)){
 		img_retn = images[4];
 	}
-	else if ((angle > 225) && (angle < 315)) {
+	else if ((angle > 101.25) && (angle < 123.75)){
+		img_retn = images[5];
+	}
+	else if ((angle > 123.75) && (angle < 146.25)){
 		img_retn = images[6];
+	}
+	else if ((angle > 146.25) && (angle < 168.75)){
+		img_retn = images[7];
+	}
+	else if ((angle > 168.75) && (angle < 191.25)){
+		img_retn = images[8];
+	}
+	else if ((angle > 191.25) && (angle < 213.75)){
+		img_retn = images[9];
+	}
+	else if ((angle > 213.75) && (angle < 236.25)){
+		img_retn = images[10];
+	}
+	else if ((angle > 236.25) && (angle < 258.75)){
+		img_retn = images[11];
+	}
+	else if ((angle > 258.75) && (angle < 281.25)){
+		img_retn = images[12];
+	}
+	else if ((angle > 281.25) && (angle < 303.75)){
+		img_retn = images[13];
+	}
+	else if ((angle > 303.75) && (angle < 326.25)){
+		img_retn = images[14];
+	}
+	else if ((angle > 326.25) && (angle < 348.75)){
+		img_retn = images[15];
 	}*/
 
-	if(angle == 0)
+	var org_angle = angle;
+
+	//rotate original angle to be facing right direction
+	angle += 90.0;
+
+	//normalize the angle to -180 and 180
+	var normalized = angle;
+    while (normalized <= -180) normalized += 360;
+    while (normalized > 180) normalized -= 360;
+	
+	angle = normalized;
+
+	if(angle < 25 && angle > -25)
 	{
 		img_retn = images[0];
 	}
-	else if(angle == 90)
+	else if(angle > 25 && angle < 75)
+	{
+		img_retn = images[1];
+	}
+	else if(angle > 75 && angle < 115)
 	{
 		img_retn = images[2];
 	}
-	else if(angle == -90)
+	else if(angle > 115 && angle < 165)
 	{
-		img_retn = images[6];
+		img_retn = images[3];
 	}
-	else if(angle == 180)
+	else if(angle > 165 && angle <= 180 || (angle <= -165 && angle > -180))
 	{
 		img_retn = images[4];
 	}
+	else if(angle < -115 && angle > -165)
+	{
+		img_retn = images[5];
+	}
+	else if(angle < -75 && angle > -115)
+	{
+		img_retn = images[6];
+	}
+	else if(angle < -25 && angle > -75)
+	{
+		img_retn = images[7];
+	}
+	
 
 	return img_retn;
 }
@@ -46,11 +111,23 @@ class BasePlayer
 	{
 		this.x = x;
 		this.y = y;
-		this.width = 20;
-		this.height = 50;
+		this.width = 84;
+		this.height = 84;
 		this.angle = 0;
 		this.score = 100;
 		this.role = 'undefined';
+		this.exploding = false;
+		this.exploded = false;
+		this.explosion_image = new Image();
+		this.explosion_image.src = 'exp2.png';
+		//frame counter
+		this.counter = 0;
+		//current iteration step of image
+		this.vertical_index = 0;
+		//movement direction on the image
+		this.horizontal_index = 0;
+		this.collision_bounds = [0,0,0,0];
+		this.updateCollisionBounds();
 	}
 
 	setPosition(x,y)
@@ -58,10 +135,37 @@ class BasePlayer
 		this.x = x;
 		this.y = y;
 	}
+
+	setExploding(state)
+	{
+		this.exploding = state;
+	}
+
+	
+	setExploded(state)
+	{
+		this.exploded = state;
+	}
+
+	get getExploding()
+	{
+		return this.exploding;
+	}
+
+	get getCollisionBounds()
+	{
+		return this.collision_bounds;
+	}
+
+	get getExploded()
+	{
+		return this.exploded;
+	}
 	
 	setAngle(angl)
 	{
 		this.angle = angl;
+		this.updateCollisionBounds();
 	}
 
 	get getAngle()
@@ -110,17 +214,106 @@ class BasePlayer
 		this.score = score;
 	}
 	
+
+	updateCollisionBounds()
+	{
+
+		var angle = this.angle;
+
+		angle += 90.0;
+
+		//normalize to range
+		var normalized = angle;
+		while (normalized <= -180) normalized += 360;
+		while (normalized > 180) normalized -= 360;
+		
+		angle = normalized;
+		
+		var direction = 0;
+
+		if(angle < 25 && angle > -25 || (angle > 165 && angle <= 180 || (angle <= -165 && angle > -180)))
+		{
+			direction = 0;
+		}
+
+		else if(angle > 75 && angle < 115 || (angle < -75 && angle > -115))
+		{
+			direction = 1;
+		}
+		else
+		{
+			direction = 2;
+		}
+
+		//up/down
+		if(direction == 0)
+		{
+			this.collision_bounds[2] = 55;//width
+			this.collision_bounds[3] = 84;//height
+			this.collision_bounds[0] = this.x - (this.collision_bounds[2] / 2);//x 
+			this.collision_bounds[1] = this.y - (this.collision_bounds[3] / 2);//y
+		}
+		else if(direction == 1)//left/right
+		{
+			this.collision_bounds[2] = 110;//width
+			this.collision_bounds[3] = 55;//height
+			this.collision_bounds[0] = this.x - (this.collision_bounds[2] / 2);//x 
+			this.collision_bounds[1] = this.y - (this.collision_bounds[3] / 2);//y
+		}
+		else//rest
+		{
+			this.collision_bounds[2] = 105;//width
+			this.collision_bounds[3] = 84;//height
+			this.collision_bounds[0] = this.x - (this.collision_bounds[2] / 2);//x 
+			this.collision_bounds[1] = this.y - (this.collision_bounds[3] / 2);//y
+		}
+	}
+
+
+	doExplosion() {
+
+		var canvas = document.getElementById('canvas');			
+		var ctx = canvas.getContext('2d');
+		
+		this.setExploding(true);
+
+		//size of each slice of the image
+		var step_width = 62;
+		var step_height = 62;
+
+		ctx.drawImage(this.explosion_image, this.horizontal_index * step_width, this.vertical_index * step_height,
+			step_width, step_height, this.x - step_width, this.y - step_height, step_width*2, step_height*2);
+	
+		//check if exp.png is still going
+		if ((this.horizontal_index != 4) && (this.vertical_index != 4)) {
+			this.counter++;
+		}
+		else{
+			this.setExploded(true);
+		}
+
+		if (this.counter > 5) {
+			//next slice
+			this.horizontal_index++;
+			//4 slices per horizontal and vertical row
+			if (this.horizontal_index >= 4) {
+				this.horizontal_index = 0;
+
+				//move to next row
+				this.vertical_index++;
+
+				if (this.vertical_index >= 4) {
+					//vertical_index = 0;
+				}
+
+			}
+
+			this.counter = 0;
+		}
+
+	}
 }
-var img = new Image();
-img.src = 'exp2.png';
-//frame counter
-var counter = 0;
-//current iteration step of image
-var vertical_index = 0;
-//movement direction on the image
-var horizontal_index = 0;
-//death timer
-var ticks = 0;
+
 class LocalPlayer extends BasePlayer
 {
 	constructor(x,y)
@@ -212,9 +405,15 @@ class LocalPlayer extends BasePlayer
 	addVelocity(x,y)
 	{
 		this.velocity_x += x;
-		this.velocity_y += y;0
+		this.velocity_y += y;
 	}
 
+
+	setVelocity(x,y)
+	{
+		this.velocity_x = x;
+		this.velocity_y = y;
+	}
 
     //draw localplayer
 	drawLocalPlayer()
@@ -227,78 +426,29 @@ class LocalPlayer extends BasePlayer
 		ctx.fillStyle = 'rgba(255, 255, 23)';
 		ctx.font = '18px tahoma';
 		ctx.textAlign = 'center';		
-		var center_x = (this.x + (this.width / 2));
-		//draw text on center of this objects size. only on x axis
-		ctx.fillText('(you)', center_x, this.y - 20);
 
-		//save canvas current state
-		ctx.save();
+
 		//change colour
 		ctx.fillStyle = 'rgb(255, 255, 0)';
 
 		//translate the position
-		ctx.translate(this.x+this.width/2,this.y+this.height/2);
+	//	ctx.translate(this.x+this.width/2,this.y+this.height/2);
 
 		//rotate the shape in degrees
 		//ctx.rotate(this.angle*Math.PI/180);
 
-		ctx.drawImage(getImageBasedOnRoleAndAngle(this.role,this.getAngle), -64, -64, 128, 128);
+		ctx.drawImage(getImageBasedOnRoleAndAngle(this.role,this.getAngle), this.x - 64, this.y - 64, 128, 128);
 
-		//draw the base rectangle
-		ctx.fillRect(-this.width/2, -this.height/2, this.width, this.height);
 
-		ctx.fillStyle = 'rgb(200, 200, 200)';
+		var collision = this.getCollisionBounds;
 
-		//draw gray rect to indicate the current move direction
-		ctx.fillRect(-this.width/2, -this.height/2, this.width, 5);
+		var center_x = (collision[0] + (collision[2] / 2));
+		//draw text on center of this objects size. only on x axis
+		ctx.fillText('(you)', center_x, this.y - 64);
 
-		//restore the original canvas state
-		ctx.restore();
-
-		//size of each slice of the image
-		var step_width = 62;
-		var step_height = 62;
-	
-			if ((this.score) <= 0) {
-
-			ctx.drawImage(img,horizontal_index  * step_width, vertical_index * step_height,
-			step_width, step_height, this.x, this.y,step_width,step_height);
-			
-			//check if exp.png is still going
-			if ((horizontal_index != 4) && (vertical_index != 4))
-			{
-				counter++;
-			}
-			
-			if (ticks < 50){
-				ticks++;
-			}
-			else{
-				ticks = 51;
-			}
-
-			if(counter > 5)
-			{
-				//next slice
-				horizontal_index++;
-				//4 slices per horizontal and vertical row
-				if (horizontal_index >= 4) {
-					horizontal_index = 0;
-
-					//move to next row
-					vertical_index++;
-
-					if(vertical_index >= 4)
-					{
-						//vertical_index = 0;
-					}
-					
-				}
-
-				counter = 0;
-			}	
-		}
 	}
+
+	
 	setLastAngle(angle)
 	{
 		this.last_angle = angle;
@@ -351,25 +501,7 @@ class Enemy extends BasePlayer
 		var ctx = canvas.getContext('2d');
 
 
-		ctx.save();
-		ctx.fillStyle = 'rgb(255, 255, 0)';
-
-		ctx.translate(this.x+this.width/2,this.y+this.height/2);
-
-		//ctx.rotate(this.angle*Math.PI/180);
-
-		ctx.drawImage(getImageBasedOnRoleAndAngle(this.role,this.angle), -64, -64, 128, 128);
-
-
-		//base draw
-		ctx.fillRect(-this.width/2, -this.height/2, this.width, this.height);
-
-		ctx.fillStyle = 'rgb(200, 200, 200)';
-
-		//show which way its facing
-		ctx.fillRect(-this.width/2, -this.height/2, this.width, 5);
-
-		ctx.restore();
+		ctx.drawImage(getImageBasedOnRoleAndAngle(this.role,this.angle), this.x - 64, this.y - 64, 128, 128);
 
 	}
 
