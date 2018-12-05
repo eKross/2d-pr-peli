@@ -18,11 +18,22 @@ class Room
     this.rooli = 'rosvo';
     this.org_x = 0;
     this.org_y = 0;
+    this.username = "none";
   }
   
   setRole(rooli)
   {
     this.rooli = rooli;
+  }
+
+  setUserName(uname)
+  {
+    this.username = uname;
+  }
+
+  get getUserName()
+  {
+    return this.username;
   }
 
 
@@ -32,6 +43,7 @@ class Room
     this.rooli = 'rosvo';
     this.org_x = 0;
     this.org_y = 0;
+    this.username = "none";
   }
 
   setOrgPos(x,y)
@@ -98,18 +110,23 @@ io.on('connection', function(socket){
   //socket.broadcast.emit('position update',pos_x,pos_y,angle);
   });
 
-  socket.on('create projectile', (pos_x,pos_y,angle,endpos_x,endpos_y) => {
+  socket.on('create projectile', (pos_x,pos_y,angle,endpos_x,endpos_y,time) => {
     var room_name = "undefined";
     Object.keys(socket.rooms).forEach(function(room, idx) {
       if(idx!=0){
           room_name = room;
       }
    });
-    socket.to(room_name).emit('create projectile',pos_x,pos_y,angle,endpos_x,endpos_y);
+    socket.to(room_name).emit('create projectile',pos_x,pos_y,angle,endpos_x,endpos_y,time);
 
   });
 
   socket.on('game ended', (index) => {
+    if(index == -1)
+    {
+      console.log("error invalid room index");
+      return;
+    }
     var room =  rooms[index];
     room.cleanUp();
     socket.emit('rooms update', index, room.getName, room.getUsers);
@@ -120,24 +137,35 @@ io.on('connection', function(socket){
   socket.on('player left', (index) => {
     var room =  rooms[index];
     room.cleanUp();
-    socket.broadcast.emit('enemy left');
+    var room_name = "undefined";
+    Object.keys(socket.rooms).forEach(function(room, idx) {
+      if(idx!=0){
+          room_name = room;
+      }
+   });
+    socket.to(room_name).emit('enemy left');
+
     socket.emit('rooms update', index, room.getName, room.getUsers);
     socket.broadcast.emit('rooms update', index, room.getName, room.getUsers);
   });
 
-  socket.on('chosen room', (index) => {
+  socket.on('chosen room', (username,index,wanted_role) => {
+    if(index == -1)
+    {
+      console.log("error invalid room index");
+      return;
+    }
+    rooms[index].updateUsers();
+    var room = rooms[index];
+    socket.emit('rooms update', index, room.getName, room.getUsers);
+    socket.broadcast.emit('rooms update', index, room.getName, room.getUsers);
+    
     socket.join(rooms[index].getName, function () {
-
-      rooms[index].updateUsers();
-
       var room = rooms[index];
-      socket.emit('rooms update', index, room.getName, room.getUsers);
-      socket.broadcast.emit('rooms update', index, room.getName, room.getUsers);
-
 
       //randomize position for player... based on canvas width, height
-      var pos_x = Math.floor(Math.random() * 950);
-      var pos_y = Math.floor(Math.random() * 750);
+      var pos_x = Math.floor(Math.random() * 1700);
+      var pos_y = Math.floor(Math.random() * 1700);
       var room_name = "undefined";
       //find the name of room on this index
       Object.keys(socket.rooms).forEach(function (room, idx) {
@@ -146,25 +174,30 @@ io.on('connection', function(socket){
         }
       });
 
-      socket.emit('get start info', pos_x, pos_y, room.getRole);
 
       var room = rooms[index];
 
+      //this means were first player in the room and he gets whatever role he chose
       if (room.getOrgX == 0 && room.getOrgX == 0) {
         room.setOrgPos(pos_x, pos_y);
-      }
-
-
-      socket.to(room_name).emit('player joined', room.getOrgX, room.getOrgY);
-
-
-      //he needs to know the player already on the field
-      if (room.getRole == 'poliisi') {
-        socket.emit('player joined', room.getOrgX, room.getOrgY);
+        room.setUserName(username);
+        room.setRole(wanted_role);
+       socket.emit('get start info', pos_x, pos_y, room.getRole);
 
       }
+      //choose his role for him opposite of already on the field
+      else{
+        if(room.getRole == 'poliisi')
+          socket.emit('get start info', pos_x, pos_y, 'rosvo');
+        else
+         socket.emit('get start info', pos_x, pos_y, 'poliisi');
 
-      room.setRole('poliisi');
+
+         socket.emit('player joined',room.getUserName, room.getOrgX, room.getOrgY);
+      }
+
+      socket.to(room_name).emit('player joined',username, pos_x, pos_y);
+
     });
   });
 

@@ -5,7 +5,7 @@ class projectile{
 		this.x = x;
         this.y = y;
         //default size
-		this.height = 10;
+		this.height = 80;
 		this.width = 20;
 		this.angle = 0;
 		this.created_locally = false;
@@ -16,8 +16,15 @@ class projectile{
 		this.last_valid_hyp = 0;
 		this.last_end_pos_x = 0;
 		this.last_end_pos_y = 0;
-
+		this.bullet_image = new Image();
+		this.bullet_image.src = 'Sprites/bullet.png';
+		this.aim_assist_time = 0.0;
+		this.aim_assist_delay = 1.0;
+		this.active_aim_assist = false;
+		this.aim_assist_duration = 1.5;
+		this.can_have_aim_assist = true;
 	}
+
 
 	setPosition(x,y)
 	{		
@@ -40,6 +47,53 @@ class projectile{
 	{
 		return this.last_valid_hyp;
 	}
+
+	get getActiveAimAssist()
+	{
+		return this.active_aim_assist;
+	}
+
+	get getAimAssistDelay()
+	{
+		return this.aim_assist_delay;
+	}
+
+	get getCanHaveAimAssist()
+	{
+		return this.can_have_aim_assist;
+	}
+
+	
+	get getAimAssistTime()
+	{
+		return this.aim_assist_time;
+	}
+
+
+	
+	get getAimAssistDuration()
+	{
+		return this.aim_assist_duration;
+	}
+
+
+	setActiveAimAssist(state)
+	{
+		this.active_aim_assist = state;
+		this.can_have_aim_assist = false;
+	}
+
+	setAimAssistTime(time)
+	{
+		this.aim_assist_time = time;
+	}
+
+	setAimAssistDuration(time)
+	{
+		this.aim_assist_duration = time;
+	}
+
+
 	setEndPosition(x,y)
 	{
 		this.end_position_x = x;
@@ -125,6 +179,34 @@ class projectile{
 
 	}
 
+
+	checkCollision(player) {
+		var enemy_collision = player.getCollisionBounds;
+		var missile_collision = this.getCollisionBounds;
+
+
+		var missile_col_x = missile_collision[0];
+		var missile_col_y = missile_collision[1];
+		var missile_col_w = missile_collision[2];
+		var missile_col_h = missile_collision[3];
+
+
+		var enemy_col_x = enemy_collision[0];
+		var enemy_col_y = enemy_collision[1];
+		var enemy_col_w = enemy_collision[2];
+		var enemy_col_h = enemy_collision[3];
+
+
+		//checks based on missile x, y, width, height and enemy x, y, width, height
+		if (missile_col_x < enemy_col_x + enemy_col_w &&
+			missile_col_x + missile_col_w > enemy_col_x &&
+			missile_col_y < enemy_col_y + enemy_col_h &&
+			missile_col_h + missile_col_y > enemy_col_y) {
+			return true;
+		}
+
+		return false;
+	}
 	
 
     //draw projectile
@@ -135,8 +217,8 @@ class projectile{
 		var ctx = canvas.getContext('2d');
 
 
-		var missle_x = this.getX;
-		var missle_y = this.getY;
+		var missle_x = this.getX + viewport.x;
+		var missle_y = this.getY+ viewport.y;
 
         //do colours based on role
 		if(this.createdLocally)
@@ -166,14 +248,29 @@ class projectile{
 		ctx.save();
 
 		//translate the position
-		ctx.translate(this.x+this.width/2,this.y+this.height/2);
+		ctx.translate(missle_x+this.width/2,missle_y+this.height/2);
+
+		var angle = this.angle + 90.0;
+
+		//normalize the angle to -180 and 180
+		var normalized = angle;
+		while (normalized <= -180) normalized += 360;
+		while (normalized > 180) normalized -= 360;
+		
+		angle = normalized;
 
 		//rotate the shape in degrees
-		ctx.rotate(this.angle*Math.PI/180);
+		ctx.rotate(angle*Math.PI/180);
 
         
         //draw rectangle
-		ctx.fillRect(0, 0, this.getWidth, this.getHeight);
+		//ctx.fillRect(0, 0, this.getWidth, this.getHeight);
+
+		var step_width = 64;
+		var step_height = 360;
+
+		ctx.drawImage(this.bullet_image, 0,0,
+			step_width, step_height,0,0, this.width, this.height);
 
 		ctx.restore();
 
