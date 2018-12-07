@@ -703,7 +703,8 @@ function drawOutOfFieldArrows() {
 var background_img = new Image();
 background_img.src = 'Sprites/mapbase.png';
 
-var obj3 = new collectible(300, 300);
+var obj3 = new collectible(900, 300);
+var item_collected = false;
 
 
 //This function handles all game related stuff including drawing
@@ -762,18 +763,46 @@ function GameLoop() {
 				ctx.drawImage(background_img, 0, 0,
 				canvas.width, canvas.height, viewport.x, viewport.y, map.width, map.height);
 
-				/*var obj = new ObjectObstacle(345, 345);
+				var obj = new ObjectObstacle(345, 345);
 				obj.drawObject(viewport.x, viewport.y);
 				obj.checkCollision(localplayer);
 
 				var obj2 = new ObjectObstacle(845, 1045);
 				obj2.drawObject(viewport.x, viewport.y);
-				obj2.checkCollision(localplayer);*/
-
-		
+				obj2.checkCollision(localplayer);
+			
+				if(item_collected == false){
 				obj3.drawObject(viewport.x, viewport.y);
+				}
 				
-				obj3.checkCollision(localplayer);
+				
+				//how many scorepoints will be added
+				var score_step = 20;
+				//check player collision
+				if (enemy != 0) {
+
+					if (obj3.checkCollision(enemy)) {
+
+					var score = enemy.getScore;
+					enemy.setScore(score + score_step);
+					item_collected == true;
+				
+			}
+		}
+				if (enemy != 0) {
+
+
+					if (obj3.checkCollision(localplayer)) {
+					var score = localplayer.getScore;
+
+					localplayer.setScore(score + score_step);
+					item_collected == true;
+
+				
+
+			}
+		}
+		
 				
 
 				localplayer.drawLocalPlayer(localplayer);
@@ -789,6 +818,7 @@ function GameLoop() {
 
 				enemy.drawEnemy();
 				music.play();
+				
 			}
 
 			//loop every missile in the array

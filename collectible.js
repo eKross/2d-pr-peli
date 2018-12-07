@@ -1,14 +1,13 @@
+var item_collected = false;
 class collectible{
 	constructor(x,y) {
 		this.x = x;
 		this.y = y;
-		this.height = 100;
-		this.width = 100;
+		this.height = 50;
+		this.width = 50;
 		this.collision_bounds = [0,0,0,0];
 		this.object_image = new Image();
-		this.object_image.src = 'Sprites/RTS_crate.png';
-		
-	
+		this.object_image.src = 'Sprites/Box.png';
 	}
 
 	setPosition(x,y) {		
@@ -56,18 +55,22 @@ class collectible{
 		var enemy_col_y = enemy_collision[1];
 		var enemy_col_w = enemy_collision[2];
 		var enemy_col_h = enemy_collision[3];
+		
 
 		if (obj_col_x < enemy_col_x + enemy_col_w &&
 			obj_col_x + obj_col_w > enemy_col_x &&
 			obj_col_y < enemy_col_y + enemy_col_h &&
-			obj_col_h + obj_col_y > enemy_col_y ) {
-			//player.setMovingInverse(true);
-			console.log("Osuma");
+			obj_col_h + obj_col_y > enemy_col_y && item_collected == false ) {
+				
+			item_collected = true;
 			return true;
+		
 		}
 
 		return false;
 	}
+	
+
 	
 	drawObject(x, y) {
 		this.updateCollisionBounds();
@@ -75,9 +78,9 @@ class collectible{
 		var ctx = canvas.getContext('2d');
 
 		var obj_img = new Image();
-		obj_img.src = 'Sprites/RTS_crate.png';
+		obj_img.src = 'Sprites/Box.png';
 		ctx.drawImage(obj_img, 0, 0,
-        64, 64, x + this.x, y + this.y, this.height, this.width);
+        684, 382, x + this.x, y + this.y, this.height, this.width);
 
 	
 }
