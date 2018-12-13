@@ -205,9 +205,7 @@ class BasePlayer
 		this.animation_vertical_index = 0;
 		this.animation_horizontal_index = 0;
 		this.animation_counter = 0;
-		this.last_x = this.x;
-		this.last_y = this.y;
-		
+		this.has_moved = false;
 		this.scale_to_draw_w = 200;
 		this.scale_to_draw_h = 200;
 		this.fired_a_projectile = false;
@@ -236,6 +234,16 @@ class BasePlayer
 	get getExploding()
 	{
 		return this.exploding;
+	}
+
+	get getHasMoved()
+	{
+		return this.has_moved;
+	}
+
+	setHasMoved(state)
+	{
+		this.has_moved = state;
 	}
 
 	get getCollisionBounds()
@@ -310,20 +318,7 @@ class BasePlayer
 		this.score = score;
 	}
 
-	setLastPosition(x,y)
-	{
-		this.last_x = x;
-		this.last_y = y;
-	}
-	get getLastX()
-	{
-		return this.last_x;
-	}
 
-	get getLastY()
-	{
-		return this.last_y;
-	}
 	
 
 	updateCollisionBounds()
@@ -438,6 +433,8 @@ class LocalPlayer extends BasePlayer
 		this.last_delta_x = 0;
 		this.last_delta_y = 0;
 		this.moving_inverse = false;
+		this.last_x = this.x;
+		this.last_y = this.y;
 		//we can access BasePlayer variables here too due class derivation
 		this.score = 100;
 	}
@@ -511,6 +508,20 @@ class LocalPlayer extends BasePlayer
 		return this.last_delta_y;
 	}
 
+	setLastPosition(x,y)
+	{
+		this.last_x = x;
+		this.last_y = y;
+	}
+	get getLastX()
+	{
+		return this.last_x;
+	}
+
+	get getLastY()
+	{
+		return this.last_y;
+	}
 
 	setLastDelta(x,y)
 	{
@@ -703,7 +714,7 @@ class LocalPlayer extends BasePlayer
 		if (x_int != lastx_int || y_int != lasty_int || angle_int != last_angle_int) {
 
 			//emit event to server of our position/angle update
-			socket.emit('position update', this.x, this.y, this.angle);			
+			socket.emit('position update', room_index,this.getRole,this.x, this.y, this.angle);			
 			//update the latest sent info
 			this.setLastPosition(x_int,y_int);
 			this.setLastAngle(angle_int);
@@ -713,7 +724,8 @@ class LocalPlayer extends BasePlayer
 	setPosition(x,y)
 	{	
 		super.setPosition(x,y);
-		this.handleBounds();
+		if(this.getHasMoved)
+			this.handleBounds();
 		this.checkSendUpdate();
 	}
 }
@@ -724,6 +736,24 @@ class Enemy extends BasePlayer
 	{
 		super(x,y);
 		this.username = username;
+		this.last_x = this.x;
+		this.last_y = this.y;
+	}
+
+
+	setLastPosition(x,y)
+	{
+		this.last_x = x;
+		this.last_y = y;
+	}
+	get getLastX()
+	{
+		return this.last_x;
+	}
+
+	get getLastY()
+	{
+		return this.last_y;
 	}
 
     //draw networked player
