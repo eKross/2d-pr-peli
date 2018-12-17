@@ -242,6 +242,8 @@ function HandleRoomsLogic() {
 				ctx.strokeRect(center_x - (text_width / 2), 50 + (i * 30) - (scaled_height / 2), text_width, text_height);
 			}
 		}
+		ctx.fillText("Credits", canvas.width/2, 700); 
+		ctx.fillText("http://www.freesfx.co.uk", canvas.width/2, 750); 
 	}
 	//then we move onto the role selection
 	else {

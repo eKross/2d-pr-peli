@@ -55,7 +55,7 @@ function preload() {
 }
 //-- usage --//
 preload(
-   		'Sprites/Criminal/0d/0dsheet.png',
+	'Sprites/Criminal/0d/0dsheet.png',
     	'Sprites/Criminal/22,5d/22,5dsheet.png',
         'Sprites/Criminal/45d/45dsheet.png',
         'Sprites/Criminal/67,5d/67,5dsheet.png',
@@ -234,7 +234,6 @@ var accelerate = 0.02;
 var last_fire_time = 0.0;
 var angularVel = 0.0;
 var angularFriction = 0.92;
-var item_collected = false;
 
 //handle localplayer movement and projectiles on key presses
 function handleLocalPlayerKeys()
@@ -321,13 +320,19 @@ function handleLocalPlayerKeys()
 		}
 		engine.play();
 	}
-	if(!keys[37] && !keys[38] && !keys[39] && !keys[40]
-	&& !keys[83] && !keys[87] && !keys[68] && !keys[65])   
-	{
+	if (!keys[37] && !keys[38] && !keys[39] && !keys[40]
+		&& !keys[83] && !keys[87] && !keys[68] && !keys[65]) {
 		accelerate = 0.02;
 		localplayer.setMovingInverse(false);
 	}
+	else {
+		localplayer.setHasMoved(true);
+	}
 
+
+
+	if (!localplayer.getHasMoved && !keys[32])
+		return;
 
 	accelerate += 0.07;
 
@@ -346,6 +351,7 @@ function handleLocalPlayerKeys()
 	//make sure hypotenuse has some length
 	if(hyp > 0.0  || hyp < 0.0)
 	{
+		console.log(hyp);
 		if(vel_x < -0.1 || vel_x > 0.1 || vel_y < -0.1 || vel_y > 0.1)
 		{
 			delta_x = (delta_x / hyp);
@@ -383,28 +389,42 @@ function handleLocalPlayerKeys()
 		delta_x = localplayer.getLastDeltaX;
 		delta_y = localplayer.getLastDeltaY;
 
-		if(delta_x > 0.0 || delta_x < 0.0 || delta_y > 0.0 || delta_y < 0.0)
-		{
+		if (delta_x > 0.0 || delta_x < 0.0 || delta_y > 0.0 || delta_y < 0.0) {
 
 		}
 		else//no stored delta.... player has not moved yet since start of the game
 		{
 
-			delta_x = localplayer.getX + 500;
-			delta_y = 0;
+		
+			//reverse Math.atan2()
+			//calculate reverse positions from angle...
+			//we use "guess" amount of lenght (5) so we can calculate the reverse points from angle
+			var theta = localplayer.getAngle * Math.PI / 180.0;
+			var proposed_len = 5;
+			var reverse_x = proposed_len * Math.cos(theta);
+			var reverse_y = proposed_len * Math.sin(theta);
+
+			delta_x = reverse_x;
+			delta_y = reverse_y;
+
+			var hyp = Math.sqrt(delta_x * delta_x + delta_y * delta_y);
+
+			if (hyp > 0.0 || hyp < 0.0) {
+				delta_x = (delta_x / hyp);
+				delta_y = (delta_y / hyp);
+			}
 		}
 
-		var  rad = Math.atan2(delta_y,delta_x);
+		var rad = Math.atan2(delta_y, delta_x);
 		//radians to degrees
-		angle = rad/Math.PI * 180;
+		angle = rad / Math.PI * 180;
 	}
 
-	localplayer.setVelocity(vel_x,vel_y);
+	localplayer.setVelocity(vel_x, vel_y);
 	//set new position and angle
 	//localplayer.setAngle(angle);			
-	localplayer.setPosition(pos_x,pos_y);
-	localplayer.setVelocity(localplayer.getVelocityX,localplayer.getVelocityY);
-	
+	localplayer.setPosition(pos_x, pos_y);
+
 	//current time in seconds
 	var curtime = new Date().getTime() / 1000;
 	//elapsed time
@@ -412,31 +432,31 @@ function handleLocalPlayerKeys()
 
 	//spacebar
 	//delay shots by 0.2 seconds so player cannot constantly shoot
-	if(keys[32] && delta > 0.2)
-	{   
+	if (keys[32] && delta > 0.2) {
 
 		var collision = localplayer.getCollisionBounds;
 		//create new missile 	
 
-		var missile = new projectile(0,0);
+		var missile = new projectile(0, 0);
 
 
 		var new_x = collision[0] + (collision[2] / 2) - (missile.getWidth / 2);
 		var new_y = collision[1] + (collision[3] / 2) - (missile.getHeight / 2);
 
-		missile.setPosition(new_x,new_y);
+		missile.setPosition(new_x, new_y);
 
 		//mark this missile as created by localplayer so it's not considered networked
 		missile.setCreatedLocally();
 
 		missile.setAngle(angle);
-		missile.setEndPosition(delta_x,delta_y);
-		missile.setAimAssistTime(curtime+missile.getAimAssistDelay);
+		missile.setEndPosition(delta_x, delta_y);
+		missile.setAimAssistTime(curtime + missile.getAimAssistDelay);
 
 		projectiles.push(missile);
 
 		//send server information that we fired a missile
-		socket.emit('create projectile',missile.getX,missile.getY,angle,missile.getEndPositionX,missile.getEndPositionY,curtime+missile.getAimAssistDelay);
+		socket.emit('create projectile', localplayer.getRole, room_index, missile.getX, missile.getY, angle,
+			missile.getEndPositionX, missile.getEndPositionY, curtime + missile.getAimAssistDelay);
 		//set the spacebar value as false so we only fire once per event
 		weapon.play();
 		//set playtime to 0 so sound plays nicely when firing
@@ -445,6 +465,9 @@ function handleLocalPlayerKeys()
 
 		localplayer.setFiredProjectile(true);
 	}
+
+
+
 }
 
 function ApproachTarget(value,target,speed)
@@ -476,106 +499,12 @@ function handleMissilesArray() {
 		var missile_x = missile.getX;
 		var missile_y = missile.getY;
 
-		var curtime = new Date().getTime() / 1000;
-
-		//check the delay on start of firing a missile
-		if((curtime - missile.getAimAssistTime) > 1 && missile.getCanHaveAimAssist)
-		{
-			//missile.setActiveAimAssist(true);
-		}
-
-
-		var canvas = document.getElementById('canvas');
-
-		var ctx = canvas.getContext('2d');
-
-		//aim assist code if needed... basicly like aimbot currently for a second
-		if (missile.getActiveAimAssist && enemy != 0) {
-
-			var enemy_collision = enemy.getCollisionBounds;
-
-			if (!missile.createdLocally) {
-				enemy_collision = localplayer.getCollisionBounds;
-			}
-
-			var target_x = enemy_collision[0] + (enemy_collision[2] / 2);
-
-			var value_x = ApproachTarget(missile_x, target_x, projectile_speed);
-
-
-			var delta_x = (target_x - value_x);
-
-			var target_y = enemy_collision[1] + (enemy_collision[3] / 2);
-
-			var value_y = ApproachTarget(missile_y, target_y, projectile_speed);
-
-			var delta_y = (target_y - value_y);
-
-			var rad = Math.atan2(delta_y, delta_x);
-			//radians to degrees
-			angle = rad / Math.PI * 180;
-
-			missile.setAngle(angle);
-			missile.setPosition(value_x, value_y);
-
-
-			if ((curtime - missile.getAimAssistTime) > missile.getAimAssistDuration) {
-
-				missile.setEndPosition(delta_x, delta_y);
-
-				missile.setActiveAimAssist(false);
-			}
-		}
-		else {
-			//calculate delta position
-			var delta_x = (missile_x + missile.getEndPositionX) - missile_x;
-			var delta_y = (missile_y + missile.getEndPositionY) - missile_y;
-
-			//normalize it
-			var hyp = Math.sqrt(delta_x * delta_x + delta_y * delta_y);
-			if (hyp > 0.0 || hyp < 0.0) {
-				delta_x = delta_x / hyp;
-				delta_y = delta_y / hyp;
-
-				missile_x += delta_x * projectile_speed;
-				missile_y += delta_y * projectile_speed;
-
-
-				var rad = Math.atan2(delta_y, delta_x);
-				//radians to degrees
-				angle = rad / Math.PI * 180;
-
-				missile.setAngle(angle);
-
-				missile.setLastValidHyp(hyp);
-			}
-			else {
-				delta_x = delta_x / missile.getLastValidHyp;
-				delta_y = delta_y / missile.getLastValidHyp;
-
-				missile_x += delta_x * projectile_speed;
-				missile_y += delta_y * projectile_speed;
-			}
-
-
-			missile.setPosition(missile_x, missile_y);
-		}
-
-
-		if(developer_mode)
-		{
-			ctx.beginPath();
-			ctx.moveTo(missile.getX,missile.getY);
-			ctx.lineTo(missile.getX+missile.getEndPositionX,missile.getY+missile.getEndPositionY);
-			ctx.stroke();
-		}
-
 		//draw the missile
 		missile.drawProjectile();
 
 
 
-		//how many scorepoints will be given and taken on impact
+		/*//how many scorepoints will be given and taken on impact
 		var score_step = 5;
 		//check player collision
 		if (missile.createdLocally && enemy != 0) {
@@ -602,26 +531,8 @@ function handleMissilesArray() {
 				projectiles.splice(i, 1);
 
 			}
-		}
+		}*/
 
-
-		//if missile goes out of bounds remove it from projectiles list
-		//goes out of right edge
-		if ((missile_x + missile.getWidth) >= map.width) {
-			projectiles.splice(i, 1);
-		}
-		//goes out of left edge
-		else if ((missile_x) <= 0) {
-			projectiles.splice(i, 1);
-		}
-		//goes out of top edge
-		if ((missile_y) <= 0) {
-			projectiles.splice(i, 1);
-		}
-		//goes out of bottom edge
-		else if ((missile_y + missile.getHeight) >= map.height) {
-			projectiles.splice(i, 1);
-		}
 	}
 }
 
@@ -699,14 +610,92 @@ function drawOutOfFieldArrows() {
 
 	}
 }
+var iter = 0;
+var iter_move = 0;
+var step = 0;
+var movement = 0;
+var movement_direction = false;
+function drawAnimatedEndText(animated_text)
+{
+	var canvas = document.getElementById('canvas');
+	var ctx = canvas.getContext('2d');
+
+		//top text drawn at center on x axis
+		ctx.fillStyle = 'rgba(255, 255, 23)';
+
+		var font_size = 68;
+	
+		ctx.font = '68px tahoma';
+		ctx.textAlign = 'center';
+	
+		var center_x = (canvas.width / 2);
+	
+		iter++;
+		iter_move++;
+	
+		if(iter > 6)
+		{
+			iter = 0;
+			step++;
+		}
+	
+		if(iter_move > 4)
+		{
+			iter_move = 0;
+	
+			var step_size = 2;
+			if(!movement_direction)
+			{
+				movement -= step_size;
+	
+			}
+			else
+			{
+				movement += step_size;
+			}
+			
+			if(movement >= 30 || movement <= -30)
+				movement_direction = !movement_direction;
+		}
+	
+		if(step >= animated_text.length)
+			step = 0;
+	
+		var offset = 0;
+		for(i = 0;i < animated_text.length;i++)
+		{
+			//build nice color changes
+			var red = clamp((255 - (movement * 5)),0,255);
+			var green = 230;
+			var blue = clamp(0 + (i*35),0,255);
+	
+			ctx.fillStyle = 'rgba(' + String(red) + ',' + String(green) +', ' + String(blue) + ")";
+	
+			if(step == i)
+			{
+				ctx.fillText(animated_text[i], center_x - ((font_size / 2) * animated_text.length / 2)+offset, 200 + movement);
+			}
+			else
+			{
+				ctx.fillText(animated_text[i], center_x - ((font_size / 2) * animated_text.length / 2) + offset, 200);
+			}
+	
+			//width of text on single character is buggy.		
+			var text_width = ctx.measureText(animated_text[i]).width;
+			//hardcoded value... half of font size
+			offset += text_width;
+
+			if(animated_text[i] == 'l')
+				offset += 9;
+		}
+}
 
 var background_img = new Image();
 background_img.src = 'Sprites/mapbase.png';
 
 var obj3 = new collectible(900, 300);
-var item_collected = false;
-
-
+var obj = new ObjectObstacle(345, 345);
+var obj2 = new ObjectObstacle(845, 1045);
 //This function handles all game related stuff including drawing
 function GameLoop() {
 	var canvas = document.getElementById('canvas');
@@ -761,51 +750,51 @@ function GameLoop() {
 				//our background is drawn here...
 				//we only draw image slice based on canvas size and its offsetted from background image based on viewport position
 				ctx.drawImage(background_img, 0, 0,
-				canvas.width, canvas.height, viewport.x, viewport.y, map.width, map.height);
-
-				var obj = new ObjectObstacle(345, 345);
+					canvas.width, canvas.height, viewport.x, viewport.y, map.width, map.height);
+					
+							
 				obj.drawObject(viewport.x, viewport.y);
 				obj.checkCollision(localplayer);
 
-				var obj2 = new ObjectObstacle(845, 1045);
+
 				obj2.drawObject(viewport.x, viewport.y);
 				obj2.checkCollision(localplayer);
 			
-				if(item_collected == false){
+			
 				obj3.drawObject(viewport.x, viewport.y);
-				}
+				
 				
 				
 				//how many scorepoints will be added
 				var score_step = 20;
 				//check player collision
-				if (enemy != 0) {
+				if (enemy != 0)
+				{
 
-					if (obj3.checkCollision(enemy)) {
+					if (obj3.checkCollision(enemy)) 
+					{
 
-					var score = enemy.getScore;
-					enemy.setScore(score + score_step);
-					item_collected == true;
+				    	var score = enemy.getScore;
+				    	var new_score = clamp(score+score_step,0,100);
+				    	enemy.setScore(new_score);
 				
-			}
-		}
-				if (enemy != 0) {
+		        	}
+	        	}
+			
 
 
-					if (obj3.checkCollision(localplayer)) {
-					var score = localplayer.getScore;
+				if (obj3.checkCollision(localplayer)) 
+				{
+				    var score = localplayer.getScore;
 
-					localplayer.setScore(score + score_step);
-					item_collected == true;
+					var new_score = clamp(score+score_step,0,100);
+				    localplayer.setScore(new_score);
 
-				
-
-			}
-		}
+				}
+	        	
 		
-				
 
-				localplayer.drawLocalPlayer(localplayer);
+				localplayer.drawLocalPlayer();
 			}
 
 
@@ -818,7 +807,6 @@ function GameLoop() {
 
 				enemy.drawEnemy();
 				music.play();
-				
 			}
 
 			//loop every missile in the array
@@ -890,17 +878,12 @@ function GameLoop() {
 			ctx.fillStyle = 'rgb(255, 53, 53,0.5)';
 			ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-			//top text drawn at center on x axis
-			ctx.fillStyle = 'rgba(255, 255, 23)';
-			ctx.font = '28px tahoma';
-			ctx.textAlign = 'center';
-
-			var center_x = (canvas.width / 2);
-
 			if (localplayer_died)
-				ctx.fillText('you lost', center_x, 50);
+				drawAnimatedEndText("You lost");
 			else if (enemy_died)
-				ctx.fillText('you won', center_x, 50);
+				drawAnimatedEndText("You won");
+
+
 
 			//current time in seconds
 			var curtime = new Date().getTime() / 1000;
@@ -912,6 +895,7 @@ function GameLoop() {
 				socket.emit('game ended', room_index);
 				started_yet = false;
 				room_index = -1;
+				music.pause();
 
 			}
 		}
@@ -938,6 +922,8 @@ function main()
 	//background
 	ctx.fillStyle = 'rgb(0, 123, 123,0.5)';
 	ctx.fillRect(0,0,canvas.width, canvas.height);
+
+
 	
     if (canvas.getContext && rooms.length > 0 && !started_yet && localplayer_username != "none") {
 				
@@ -952,7 +938,7 @@ function main()
 		//will start the game when chosen a room and got start info from server
 		HandleRoomsLogic();
 	}
-	else if (canvas.getContext && started_yet && localplayer_username != "none")
+	else  if (canvas.getContext && started_yet && localplayer_username != "none")
 	{
 		GameLoop();
 	}

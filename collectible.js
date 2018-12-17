@@ -8,6 +8,8 @@ class collectible{
 		this.collision_bounds = [0,0,0,0];
 		this.object_image = new Image();
 		this.object_image.src = 'Sprites/Box.png';
+		this.life = 0;
+		this.is_valid = true;
 	}
 
 	setPosition(x,y) {		
@@ -60,9 +62,13 @@ class collectible{
 		if (obj_col_x < enemy_col_x + enemy_col_w &&
 			obj_col_x + obj_col_w > enemy_col_x &&
 			obj_col_y < enemy_col_y + enemy_col_h &&
-			obj_col_h + obj_col_y > enemy_col_y && item_collected == false ) {
+			obj_col_h + obj_col_y > enemy_col_y && this.is_valid 
+			&& player.getScore != 100) {
 				
-			item_collected = true;
+				
+			var curtime = new Date().getTime() / 1000;
+			this.is_valid = false;
+			this.life = curtime;
 			return true;
 		
 		}
@@ -77,10 +83,21 @@ class collectible{
 		var canvas = document.getElementById('canvas');			
 		var ctx = canvas.getContext('2d');
 
-		var obj_img = new Image();
-		obj_img.src = 'Sprites/Box.png';
-		ctx.drawImage(obj_img, 0, 0,
+
+        if(this.is_valid)
+		ctx.drawImage(this.object_image, 0, 0,
         684, 382, x + this.x, y + this.y, this.height, this.width);
+        
+        	//current time in seconds
+			var curtime = new Date().getTime() / 1000;
+			//elapsed time
+			var delta = (curtime - this.life);
+			
+			if(delta > 10)
+			{
+			    this.is_valid = true;
+			}
+        
 
 	
 }
