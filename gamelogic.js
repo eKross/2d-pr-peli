@@ -10,10 +10,12 @@ const clamp = (n, lo, hi) => n < lo ? lo : n > hi ? hi : n;
 var canvas = document.getElementById('canvas');
 
 const map = {
-  height: 2000,
-  width: 2000
+  height: 2048,
+  width: 2048
 };
 const viewport = {};
+
+var images_loading = true;
 
 
 var developer_mode = false;
@@ -693,6 +695,11 @@ function drawAnimatedEndText(animated_text)
 var background_img = new Image();
 background_img.src = 'Sprites/mapbase.png';
 
+
+background_img.addEventListener('load', function() {
+	images_loading = false;
+  }, false);
+
 var obj3 = new collectible(900, 300);
 var obj = new ObjectObstacle(345, 345);
 var obj2 = new ObjectObstacle(845, 1045);
@@ -750,9 +757,13 @@ function GameLoop() {
 				//our background is drawn here...
 				//we only draw image slice based on canvas size and its offsetted from background image based on viewport position
 				ctx.drawImage(background_img, 0, 0,
-					canvas.width, canvas.height, viewport.x, viewport.y, map.width, map.height);
+					map.width, map.height, viewport.x,viewport.y, map.width, map.height);
 					
 							
+					
+				//ctx.drawImage(cur_image, this.animation_horizontal_index * step_width, this.animation_vertical_index * step_height,
+				//	step_width, step_height, 0,0, this.scale_to_draw_w, this.scale_to_draw_h);
+					
 				obj.drawObject(viewport.x, viewport.y);
 				obj.checkCollision(localplayer);
 
@@ -902,7 +913,8 @@ function GameLoop() {
 
 	}
 }
-
+var loading_step = 0;
+var loading_tick = 0;
 //MAIN FUNCTION CALLED 60 TIMES A SECOND
 function main()
 {
@@ -924,19 +936,56 @@ function main()
 	ctx.fillRect(0,0,canvas.width, canvas.height);
 
 
-	
+
     if (canvas.getContext && rooms.length > 0 && !started_yet && localplayer_username != "none") {
 				
 		var ctx = canvas.getContext('2d');
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-		//background
-		ctx.fillStyle = 'rgb(53, 53, 53,0.5)';
-		ctx.fillRect(0,0,canvas.width, canvas.height);
 
-		//do room choosing etc...
-		//will start the game when chosen a room and got start info from server
-		HandleRoomsLogic();
+		if (images_loading) {
+			//background
+			ctx.fillStyle = 'rgb(53, 53, 53,0.5)';
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+			//top text drawn at center on x axis
+			ctx.fillStyle = 'rgba(255, 255, 23)';
+			ctx.font = '38px tahoma';
+			ctx.textAlign = 'center';
+
+			loading_tick++;
+
+			if(loading_tick > 20)
+			{
+				loading_step++;
+
+				if(loading_step > 3)
+				loading_step = 0;
+
+				loading_tick = 0;
+			}
+			var add = "";
+			if(loading_step == 1)
+				add = ".";
+			else if(loading_step == 2)
+				add = "..";
+			else if(loading_step == 3)
+				add = "...";
+
+			var text = "Loading resources";
+			ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+
+			ctx.fillText(add,(canvas.width / 2) + ctx.measureText(text).width + 2,canvas.height / 2);
+		}
+		else{
+			//background
+			ctx.fillStyle = 'rgb(53, 53, 53,0.5)';
+			ctx.fillRect(0,0,canvas.width, canvas.height);
+
+			//do room choosing etc...
+			//will start the game when chosen a room and got start info from server
+			HandleRoomsLogic();
+		}
 	}
 	else  if (canvas.getContext && started_yet && localplayer_username != "none")
 	{

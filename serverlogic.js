@@ -593,6 +593,12 @@ setInterval(handleProjectiles,10);
 
 io.on('connection', function(socket){
   socket.on('position update', (room_idx,rooli,pos_x,pos_y,angle) => {
+    if(room_idx == -1 || room_idx >= rooms.length)
+    {
+      console.log("error invalid room index");
+      return;
+    }
+   
     var room_name = "undefined";
     Object.keys(socket.rooms).forEach(function (room_tag, idx) {
       if (idx != 0) {
@@ -604,14 +610,20 @@ io.on('connection', function(socket){
     var room = rooms[room_idx];
     if(rooli == 'poliisi')
     {
-      room.getPoliisi.setPosition(pos_x,pos_y);
-      room.getPoliisi.setAngle(angle);
+      if(room.getPoliisi != 0)
+      {
+       room.getPoliisi.setPosition(pos_x,pos_y);
+        room.getPoliisi.setAngle(angle);
+      }
     }
     
     if(rooli == 'rosvo')
     {
-      room.getRosvo.setPosition(pos_x,pos_y);
+      if(room.getRosvo != 0)
+      {
+        room.getRosvo.setPosition(pos_x,pos_y);
       room.getRosvo.setAngle(angle);
+      }
     }
 
     if(rooli == room.getRole)
@@ -623,6 +635,12 @@ io.on('connection', function(socket){
   });
 
   socket.on('create projectile', (role,room_index,pos_x,pos_y,angle,endpos_x,endpos_y,time) => {
+    if(room_index == -1 || room_index >= rooms.length)
+    {
+      console.log("error invalid room index");
+      return;
+    }
+    
     var room_name = "undefined";
     Object.keys(socket.rooms).forEach(function (room_tag, idx) {
       if (idx != 0) {
@@ -641,7 +659,7 @@ io.on('connection', function(socket){
 
 
   socket.on('game ended', (index) => {
-    if(index == -1)
+    if(index == -1 || index >= rooms.length)
     {
       console.log("error invalid room index");
       return;
@@ -654,6 +672,12 @@ io.on('connection', function(socket){
 
 
   socket.on('player left', (index) => {
+
+    if(index == -1 || index >= rooms.length)
+    {
+      console.log("error invalid room index");
+      return;
+    }
     var room =  rooms[index];
     room.cleanUp();
     var room_name = "undefined";
@@ -669,7 +693,7 @@ io.on('connection', function(socket){
   });
 
   socket.on('chosen room', (username,index,wanted_role) => {
-    if(index == -1)
+    if(index == -1 || index >= rooms.length)
     {
       console.log("error invalid room index");
       return;

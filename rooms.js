@@ -209,7 +209,7 @@ function HandleRoomsLogic() {
 	var ctx = canvas.getContext('2d');
 
 	//no room yet... choose it first
-	if (room_index == -1) {
+	if (room_index == -1 && !game_running) {
 		ctx.fillStyle = 'rgba(255, 60, 70)';
 		ctx.font = '28px tahoma';
 		ctx.textAlign = 'center';
@@ -242,9 +242,14 @@ function HandleRoomsLogic() {
 				ctx.strokeRect(center_x - (text_width / 2), 50 + (i * 30) - (scaled_height / 2), text_width, text_height);
 			}
 		}
+
+		ctx.fillText("(Credits)", canvas.width/2, 700); 
+		ctx.fillStyle = 'rgba(230, 230, 120)';
+		ctx.fillText("Riku Tiitta, Tero Kerkkänen, Santeri Riikonen, Pasi Haantio & Christian Raippa", canvas.width/2, 750); 
+		ctx.fillText("http://www.freesfx.co.uk", canvas.width/2, 800); 
 	}
 	//then we move onto the role selection
-	else {
+	else if(!game_running){
 		ctx.fillStyle = 'rgba(152, 66, 244)';
 		ctx.font = '28px tahoma';
 		ctx.textAlign = 'center';
